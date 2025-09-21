@@ -1,0 +1,14 @@
+/**
+ * Configuration file for building the CMS service in TypeScript.
+ * 
+ * This file extends the base tsconfig.json file and provides additional configuration options for the build process.
+ * 
+ * Properties:
+ * - extends: Specifies the path to the base tsconfig.json file that this configuration extends.
+ * - exclude: Specifies an array of file patterns to exclude from the build process. This can be used to exclude certain directories or file types.
+ * 
+ */
+{
+  "extends": "./tsconfig.json",
+  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
+}

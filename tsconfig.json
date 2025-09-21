@@ -1,0 +1,49 @@
+/**
+ * TypeScript configuration file for the CMS service.
+ *
+ * This file specifies the compiler options for the TypeScript compiler.
+ * It configures various settings such as module resolution, target version,
+ * output directory, and more.
+ *
+ * @compilerOptions
+ * - module: Specifies the module system for the compiled JavaScript code.
+ * - declaration: Enables the generation of declaration files (.d.ts) for TypeScript modules.
+ * - removeComments: Removes all comments from the generated JavaScript code.
+ * - emitDecoratorMetadata: Enables the emission of decorator metadata for TypeScript decorators.
+ * - experimentalDecorators: Enables support for experimental TypeScript decorators.
+ * - allowSyntheticDefaultImports: Allows importing modules that don't have a default export.
+ * - target: Specifies the ECMAScript target version for the compiled JavaScript code.
+ * - sourceMap: Generates source map files (.map) for the compiled JavaScript code.
+ * - outDir: Specifies the output directory for the compiled JavaScript code.
+ * - baseUrl: Specifies the base URL for module resolution.
+ * - incremental: Enables incremental compilation, which speeds up subsequent compilations.
+ * - skipLibCheck: Skips type checking of declaration files from external libraries.
+ * - strictNullChecks: Enables strict null checks for TypeScript code.
+ * - noImplicitAny: Disables the implicit any type for TypeScript code.
+ * - strictBindCallApply: Disables strict checking of bind, call, and apply methods.
+ * - forceConsistentCasingInFileNames: Disables case sensitivity checks for file names.
+ * - noFallthroughCasesInSwitch: Disables checking for fallthrough cases in switch statements.
+ * - esModuleInterop: Enables compatibility with CommonJS modules.
+ */
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2021",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "esModuleInterop": true
+  },
+}

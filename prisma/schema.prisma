@@ -1,0 +1,123 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Applications model for multi-tenancy
+model Application {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  description String?
+  apiKey      String   @unique @default(uuid()) @db.Uuid
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+
+  users    User[]
+  projects Project[]
+  Chat     Chat[]
+}
+
+// Users model - application-specific with unique email per application
+model User {
+  id            String   @id @default(uuid()) @db.Uuid
+  applicationId String   @db.Uuid
+  email         String
+  displayName   String?
+  avatarUrl     String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now()) @db.Timestamptz
+  updatedAt     DateTime @updatedAt @db.Timestamptz
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  chats       Chat[]
+
+  @@unique([applicationId, email]) // Unique email per application
+  @@index([applicationId])
+  @@index([email])
+}
+
+// Projects model - each application can have multiple projects with different OpenAI API keys
+model Project {
+  id            String   @id @default(uuid()) @db.Uuid
+  applicationId String   @db.Uuid
+  name          String
+  description   String?
+  projectType   String // e.g., 'general', 'coding', 'writing', 'analysis', etc.
+  openaiApiKey  String // OpenAI API key specific to this project
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now()) @db.Timestamptz
+  updatedAt     DateTime @updatedAt @db.Timestamptz
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  chats       Chat[]
+
+  @@unique([applicationId, name]) // Unique project name per application
+  @@index([applicationId])
+  @@index([projectType])
+}
+
+// Chat model - each user can have multiple chats under a specific project
+model Chat {
+  id            String   @id @default(uuid()) @db.Uuid
+  applicationId String   @db.Uuid
+  userId        String   @db.Uuid
+  projectId     String   @db.Uuid
+  title         String   @default("New Chat")
+  description   String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now()) @db.Timestamptz
+  updatedAt     DateTime @updatedAt @db.Timestamptz
+
+  application   Application    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  conversations Conversation[]
+
+  @@index([applicationId])
+  @@index([userId])
+  @@index([projectId])
+  @@index([updatedAt(sort: Desc)])
+}
+
+// Conversation model - each chat can have multiple conversations/threads
+model Conversation {
+  id        String   @id @default(uuid()) @db.Uuid
+  chatId    String   @db.Uuid
+  threadId  String   @unique @db.Uuid // OpenAI thread ID
+  title     String? // Optional conversation title
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  chat     Chat      @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@index([chatId])
+  @@index([threadId])
+  @@index([createdAt])
+}
+
+// Message model - messages within conversations
+model Message {
+  id             String   @id @default(uuid()) @db.Uuid
+  conversationId String   @db.Uuid
+  role           String // 'user', 'assistant', 'system'
+  content        String
+  metadata       Json? // Store additional message metadata (model used, tokens, etc.)
+  createdAt      DateTime @default(now()) @db.Timestamptz
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([createdAt])
+  @@index([role])
+}
