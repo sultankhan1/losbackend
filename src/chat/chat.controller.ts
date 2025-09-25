@@ -29,7 +29,7 @@ export class ChatController {
   constructor(private readonly chatService: ChatService) { }
 
   // Chat Management Endpoints
-  @Post()
+  @Post("create")
   async createChat(
     @Body() createChatDto: CreateChatDto,
     @Res() res: Response,
@@ -38,7 +38,7 @@ export class ChatController {
     return this.chatService.createChat(req.application.id, req.user.id, createChatDto, res);
   }
 
-  @Get()
+  @Get("all")
   async getChats(
     @Res() res: Response,
     @Req() req: RequestWithApplication,
@@ -46,7 +46,7 @@ export class ChatController {
     return this.chatService.getChats(req.application.id, req.user.id, res);
   }
 
-  @Get(':chatId')
+  @Get('one/:chatId')
   async getChatById(
     @Param('chatId') chatId: string,
     @Res() res: Response,
@@ -55,7 +55,7 @@ export class ChatController {
     return this.chatService.getChatById(req.application.id, req.user.id, chatId, res);
   }
 
-  @Patch(':chatId')
+  @Patch('update/:chatId')
   async updateChat(
     @Param('chatId') chatId: string,
     @Body() updateChatDto: UpdateChatDto,
@@ -65,7 +65,7 @@ export class ChatController {
     return this.chatService.updateChat(req.application.id, req.user.id, chatId, updateChatDto, res);
   }
 
-  @Delete(':chatId')
+  @Delete('delete/:chatId')
   async deleteChat(
     @Param('chatId') chatId: string,
     @Res() res: Response,
@@ -75,7 +75,7 @@ export class ChatController {
   }
 
   // Conversation Management Endpoints
-  @Post(':chatId/conversations')
+  @Post('create/:chatId/conversations')
   async createConversation(
     @Param('chatId') chatId: string,
     @Body() createConversationDto: CreateConversationDto,
@@ -86,7 +86,7 @@ export class ChatController {
   }
 
   // Message Endpoints
-  @Post(':chatId/messages')
+  @Post('send/:chatId/messages')
   async sendMessage(
     @Param('chatId') chatId: string,
     @Body() sendMessageDto: SendMessageDto,
@@ -96,7 +96,7 @@ export class ChatController {
     return this.chatService.sendMessage(req.application.id, req.user.id, chatId, sendMessageDto, res);
   }
 
-  @Get(':chatId/conversations/:conversationId/messages')
+  @Get('get/:chatId/conversations/:conversationId/messages')
   async getConversationMessages(
     @Param('chatId') chatId: string,
     @Param('conversationId') conversationId: string,

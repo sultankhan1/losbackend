@@ -18,7 +18,8 @@ export class HeaderAuthGuard implements CanActivate {
     const userId = request.headers['user-id'] as string;
 
     // Check if this is a chat endpoint
-    const isChatEndpoint = request.url?.startsWith(`${this.configService.get('API_VERSION')}/chat`);
+    console.log("request.url", request.url);
+    const isChatEndpoint = request.url?.startsWith(`/${this.configService.get('API_VERSION')}/chat`);
 
     if (!applicationApiKey) {
       throw new UnauthorizedException('API key is required');
@@ -28,6 +29,13 @@ export class HeaderAuthGuard implements CanActivate {
       throw new UnauthorizedException('App ID is required');
     }
 
+    // console.log("userId", userId);
+    // console.log("isChatEndpoint", isChatEndpoint);
+    // console.log("applicationId", applicationId);
+    // console.log("applicationApiKey", applicationApiKey);
+    // console.log("isChatEndpoint && !userId", isChatEndpoint && !userId);
+
+    
     // For chat endpoints, user-id is compulsory
     if (isChatEndpoint && !userId) {
       throw new UnauthorizedException('User ID is required for chat endpoints');

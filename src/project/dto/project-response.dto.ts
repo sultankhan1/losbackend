@@ -3,6 +3,7 @@ export class ProjectResponseDto {
   name: string;
   description?: string;
   projectType: string;
+  openaiProjectId: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;

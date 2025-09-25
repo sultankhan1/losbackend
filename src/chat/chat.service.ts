@@ -27,12 +27,25 @@ export class ChatService {
           applicationId,
           isActive: true,
         },
+        select: {
+          id: true,
+          name: true,
+          projectType: true,
+          openaiApiKey: true,
+        },
       });
 
       if (!project) {
         return this.responseService.NOT_FOUND(
-          'Project not found',
+          'Project not found or inactive',
           {},
+          res
+        );
+      }
+
+      if (!project.openaiApiKey) {
+        return this.responseService.BAD_REQUEST(
+          'Project does not have a valid OpenAI API key',
           res
         );
       }
@@ -51,6 +64,12 @@ export class ChatService {
         id: chat.id,
         title: chat.title,
         description: chat.description,
+        projectId: chat.projectId,
+        project: {
+          id: project.id,
+          name: project.name,
+          projectType: project.projectType,
+        },
         isActive: chat.isActive,
         createdAt: chat.createdAt,
         updatedAt: chat.updatedAt,
@@ -80,6 +99,13 @@ export class ChatService {
           isActive: true,
         },
         include: {
+          project: {
+            select: {
+              id: true,
+              name: true,
+              projectType: true,
+            },
+          },
           conversations: {
             where: { isActive: true },
             orderBy: { createdAt: 'desc' },
@@ -93,6 +119,12 @@ export class ChatService {
         id: chat.id,
         title: chat.title,
         description: chat.description,
+        projectId: chat.projectId,
+        project: {
+          id: chat.project.id,
+          name: chat.project.name,
+          projectType: chat.project.projectType,
+        },
         isActive: chat.isActive,
         createdAt: chat.createdAt,
         updatedAt: chat.updatedAt,
@@ -124,6 +156,13 @@ export class ChatService {
           isActive: true,
         },
         include: {
+          project: {
+            select: {
+              id: true,
+              name: true,
+              projectType: true,
+            },
+          },
           conversations: {
             where: { isActive: true },
             orderBy: { createdAt: 'desc' },
@@ -143,6 +182,12 @@ export class ChatService {
         id: chat.id,
         title: chat.title,
         description: chat.description,
+        projectId: chat.projectId,
+        project: {
+          id: chat.project.id,
+          name: chat.project.name,
+          projectType: chat.project.projectType,
+        },
         isActive: chat.isActive,
         createdAt: chat.createdAt,
         updatedAt: chat.updatedAt,
@@ -320,7 +365,15 @@ export class ChatService {
           isActive: true,
         },
         include: {
-          project: true,
+          project: {
+            select: {
+              id: true,
+              name: true,
+              projectType: true,
+              openaiApiKey: true,
+              isActive: true,
+            },
+          },
         },
       });
 
@@ -332,17 +385,26 @@ export class ChatService {
         );
       }
 
-      // If projectType is specified, try to find a project of that type
-      let project = chat.project;
-      if (sendMessageDto.projectType) {
-        const projectByType = await this.projectService.getProjectByType(applicationId, sendMessageDto.projectType);
-        if (projectByType) {
-          project = projectByType;
-        }
+      if (!chat.project || !chat.project.isActive) {
+        return this.responseService.NOT_FOUND(
+          'Project not found or inactive',
+          {},
+          res
+        );
       }
 
+      if (!chat.project.openaiApiKey) {
+        return this.responseService.BAD_REQUEST(
+          'Project does not have a valid OpenAI API key',
+          res
+        );
+      }
+
+      // Always use the project assigned to this chat
+      const project = chat.project;
+
       let conversation;
-      
+
       if (sendMessageDto.conversationId) {
         // Use existing conversation
         conversation = await this.prisma.conversation.findFirst({
@@ -394,7 +456,7 @@ export class ChatService {
         content: msg.content,
       }));
 
-      // Add system message based on project type
+      // Add system message based on the chat's project type
       const systemMessage = {
         role: 'system',
         content: this.getSystemMessage(project.projectType)

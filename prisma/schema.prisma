@@ -47,15 +47,16 @@ model User {
 
 // Projects model - each application can have multiple projects with different OpenAI API keys
 model Project {
-  id            String   @id @default(uuid()) @db.Uuid
-  applicationId String   @db.Uuid
-  name          String
-  description   String?
-  projectType   String // e.g., 'general', 'coding', 'writing', 'analysis', etc.
-  openaiApiKey  String // OpenAI API key specific to this project
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now()) @db.Timestamptz
-  updatedAt     DateTime @updatedAt @db.Timestamptz
+  id              String   @id @default(uuid()) @db.Uuid
+  applicationId   String   @db.Uuid
+  name            String
+  openaiProjectId String   @unique
+  description     String?
+  projectType     String // e.g., 'general', 'coding', 'writing', 'analysis', etc.
+  openaiApiKey    String // OpenAI API key specific to this project
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
 
   application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   chats       Chat[]

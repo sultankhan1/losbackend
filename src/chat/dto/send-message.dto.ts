@@ -9,8 +9,4 @@ export class SendMessageDto {
   @IsOptional()
   @IsUUID()
   conversationId?: string; // If not provided, will create a new conversation
-
-  @IsString()
-  @IsOptional()
-  projectType?: string; // Optional: specify project type for dynamic project selection
 }

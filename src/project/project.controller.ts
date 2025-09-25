@@ -22,7 +22,7 @@ import { HeaderAuthGuard } from '../application/guards/header-auth.guard';
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
-  @Post()
+  @Post("create")
   async create(
     @Body() createProjectDto: CreateProjectDto,
     @Res() res: Response,
@@ -32,26 +32,18 @@ export class ProjectController {
     return this.projectService.create(application.id, createProjectDto, res);
   }
 
-  @Get()
-  async findAll(
-    @Res() res: Response,
-    @Req() req: Request,
-  ) {
-    const application = (req as any).application;
-    return this.projectService.findAll(application.id, res);
-  }
 
-  @Get('by-type')
+  @Get('all')
   async findByType(
-    @Query('type') projectType: string,
     @Res() res: Response,
     @Req() req: Request,
+    @Query('type') projectType?: string,
   ) {
     const application = (req as any).application;
     return this.projectService.findByType(application.id, projectType, res);
   }
 
-  @Get(':id')
+  @Get('one/:id')
   async findOne(
     @Param('id') id: string,
     @Res() res: Response,
@@ -61,7 +53,7 @@ export class ProjectController {
     return this.projectService.findOne(application.id, id, res);
   }
 
-  @Patch(':id')
+  @Patch('update/:id')
   async update(
     @Param('id') id: string,
     @Body() updateProjectDto: UpdateProjectDto,
@@ -72,7 +64,7 @@ export class ProjectController {
     return this.projectService.update(application.id, id, updateProjectDto, res);
   }
 
-  @Delete(':id')
+  @Delete('delete/:id')
   async remove(
     @Param('id') id: string,
     @Res() res: Response,
@@ -82,7 +74,7 @@ export class ProjectController {
     return this.projectService.remove(application.id, id, res);
   }
 
-  @Patch(':id/toggle-status')
+  @Patch('toggle-status/:id')
   async toggleStatus(
     @Param('id') id: string,
     @Res() res: Response,

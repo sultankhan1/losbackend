@@ -12,6 +12,7 @@ import { PrismaModule } from "./prisma/prisma.module";
 import { ApplicationModule } from './application/application.module';
 import { ProjectModule } from './project/project.module';
 import { ChatModule } from './chat/chat.module';
+import { UserModule } from './user/user.module';
 
 /**
  * The main module of the CMS service.
@@ -32,6 +33,7 @@ import { ChatModule } from './chat/chat.module';
     ApplicationModule,
     ProjectModule,
     ChatModule,
+    UserModule,
   ],
   controllers: [
     AppController

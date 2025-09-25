@@ -19,4 +19,9 @@ export class CreateProjectDto {
   @IsString()
   @IsNotEmpty()
   openaiApiKey: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(100)
+  openaiProjectId: string;
 }

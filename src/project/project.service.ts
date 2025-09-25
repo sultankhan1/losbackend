@@ -21,6 +21,7 @@ export class ProjectService {
           description: createProjectDto.description,
           projectType: createProjectDto.projectType,
           openaiApiKey: createProjectDto.openaiApiKey,
+          openaiProjectId: createProjectDto.openaiProjectId,
         },
       });
 
@@ -29,6 +30,7 @@ export class ProjectService {
         name: project.name,
         description: project.description,
         projectType: project.projectType,
+        openaiProjectId: project.openaiProjectId,
         isActive: project.isActive,
         createdAt: project.createdAt,
         updatedAt: project.updatedAt,
@@ -44,43 +46,9 @@ export class ProjectService {
       if (error.code === 'P2002') {
         return this.responseService.CONFLICT('PROJECT', res);
       }
+      console.log(error);
       return this.responseService.INTERNAL_SERVER_ERROR(
         'Failed to create project',
-        error,
-        res
-      );
-    }
-  }
-
-  async findAll(applicationId: string, res: Response) {
-    try {
-      const projects = await this.prisma.project.findMany({
-        where: {
-          applicationId,
-          isActive: true,
-        },
-        orderBy: { createdAt: 'desc' },
-      });
-
-      const responseData = projects.map(project => ({
-        id: project.id,
-        name: project.name,
-        description: project.description,
-        projectType: project.projectType,
-        isActive: project.isActive,
-        createdAt: project.createdAt,
-        updatedAt: project.updatedAt,
-      }));
-
-      return this.responseService.success(
-        'PROJECTS_FETCHED',
-        'Projects fetched successfully',
-        responseData,
-        res
-      );
-    } catch (error) {
-      return this.responseService.INTERNAL_SERVER_ERROR(
-        'Failed to fetch projects',
         error,
         res
       );
@@ -95,6 +63,16 @@ export class ProjectService {
           applicationId,
           isActive: true,
         },
+        select:{
+          id: true,
+          name: true,
+          description: true,
+          projectType: true,
+          openaiProjectId: true,
+          isActive: true,
+          createdAt: true,
+          updatedAt: true,
+        },
       });
 
       if (!project) {
@@ -105,15 +83,7 @@ export class ProjectService {
         );
       }
 
-      const responseData = {
-        id: project.id,
-        name: project.name,
-        description: project.description,
-        projectType: project.projectType,
-        isActive: project.isActive,
-        createdAt: project.createdAt,
-        updatedAt: project.updatedAt,
-      };
+      const responseData = project;
 
       return this.responseService.success(
         'PROJECT_FETCHED',
@@ -122,6 +92,7 @@ export class ProjectService {
         res
       );
     } catch (error) {
+      console.log(error);
       return this.responseService.INTERNAL_SERVER_ERROR(
         'Failed to fetch project',
         error,
@@ -130,36 +101,50 @@ export class ProjectService {
     }
   }
 
-  async findByType(applicationId: string, projectType: string, res: Response) {
+  async findByType(applicationId: string, projectType: string | undefined, res: Response) {
     try {
+      // Build where clause conditionally
+      const whereClause: any = {
+        applicationId,
+        isActive: true,
+      };
+
+      // Only add projectType filter if it's provided
+      if (projectType) {
+        whereClause.projectType = projectType;
+      }
+
       const projects = await this.prisma.project.findMany({
-        where: {
-          applicationId,
-          projectType,
+        where: whereClause,
+        select:{
+          id: true,
+          name: true,
+          description: true,
+          projectType: true,
+          openaiProjectId: true,
           isActive: true,
+          createdAt: true,
+          updatedAt: true,
         },
         orderBy: { createdAt: 'desc' },
       });
 
-      const responseData = projects.map(project => ({
-        id: project.id,
-        name: project.name,
-        description: project.description,
-        projectType: project.projectType,
-        isActive: project.isActive,
-        createdAt: project.createdAt,
-        updatedAt: project.updatedAt,
-      }));
+      const responseData = projects;
+
+      const message = projectType 
+        ? `Projects of type '${projectType}' fetched successfully`
+        : 'All projects fetched successfully';
 
       return this.responseService.success(
-        'PROJECTS_FETCHED_BY_TYPE',
-        `Projects of type '${projectType}' fetched successfully`,
+        'PROJECTS_FETCHED',
+        message,
         responseData,
         res
       );
     } catch (error) {
+      console.log(error);
       return this.responseService.INTERNAL_SERVER_ERROR(
-        'Failed to fetch projects by type',
+        'Failed to fetch projects',
         error,
         res
       );
@@ -174,6 +159,16 @@ export class ProjectService {
           applicationId,
           isActive: true,
         },
+        select:{
+          id: true,
+          name: true,
+          description: true,
+          projectType: true,
+          openaiProjectId: true,
+          isActive: true,
+          createdAt: true,
+          updatedAt: true,
+        },
       });
 
       if (!project) {
@@ -187,17 +182,19 @@ export class ProjectService {
       const updatedProject = await this.prisma.project.update({
         where: { id: projectId },
         data: updateProjectDto,
+        select:{
+          id: true,
+          name: true,
+          description: true,
+          projectType: true,
+          openaiProjectId: true,
+          isActive: true,
+          createdAt: true,
+          updatedAt: true,
+        },
       });
 
-      const responseData = {
-        id: updatedProject.id,
-        name: updatedProject.name,
-        description: updatedProject.description,
-        projectType: updatedProject.projectType,
-        isActive: updatedProject.isActive,
-        createdAt: updatedProject.createdAt,
-        updatedAt: updatedProject.updatedAt,
-      };
+      const responseData = updatedProject;
 
       return this.responseService.success(
         'PROJECT_UPDATED',
@@ -216,6 +213,7 @@ export class ProjectService {
       if (error.code === 'P2002') {
         return this.responseService.CONFLICT('PROJECT', res);
       }
+      console.log(error);
       return this.responseService.INTERNAL_SERVER_ERROR(
         'Failed to update project',
         error,
@@ -232,6 +230,16 @@ export class ProjectService {
           applicationId,
           isActive: true,
         },
+        select:{
+          id: true,
+          name: true,
+          description: true,
+          projectType: true,
+          openaiProjectId: true,
+          isActive: true,
+          createdAt: true,
+          updatedAt: true,
+        },
       });
 
       if (!project) {
@@ -245,15 +253,28 @@ export class ProjectService {
       await this.prisma.project.update({
         where: { id: projectId },
         data: { isActive: false },
+        select:{
+          id: true,
+          name: true,
+          description: true,
+          projectType: true,
+          openaiProjectId: true,
+          isActive: true,
+          createdAt: true,
+          updatedAt: true,
+        },
       });
+
+      const responseData = project;
 
       return this.responseService.success(
         'PROJECT_DELETED',
         'Project deleted successfully',
-        {},
+        responseData,
         res
       );
     } catch (error) {
+      console.log(error);
       return this.responseService.INTERNAL_SERVER_ERROR(
         'Failed to delete project',
         error,
@@ -301,6 +322,7 @@ export class ProjectService {
         res
       );
     } catch (error) {
+      console.log(error);
       return this.responseService.INTERNAL_SERVER_ERROR(
         'Failed to toggle project status',
         error,
